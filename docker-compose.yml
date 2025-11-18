@@ -1,0 +1,67 @@
+
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: bivote_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: db_pemilos
+      MYSQL_USER: reip
+      MYSQL_PASSWORD: bcst2526
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./config/database.sql:/docker-entrypoint-initdb.d/01-database.sql
+    ports:
+      - "3307:3307"
+    networks:
+      - bivote_network
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: bivote_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3307
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    ports:
+      - "8087:8087"
+    depends_on:
+      - mysql
+    networks:
+      - bivote_network
+
+  # Apache Web Server with PHP
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bivote_webserver
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/apache/sites-available:/etc/apache2/sites-available
+      - ./docker/apache/sites-enabled:/etc/apache2/sites-enabled
+      - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+    depends_on:
+      - mysql
+    networks:
+      - bivote_network
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  bivote_network:
+    driver: bridge

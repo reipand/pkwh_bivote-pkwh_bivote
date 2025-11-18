@@ -1,0 +1,4 @@
+/* Card gradient */
+.candidate-card {
+    background: linear-gradient(to bottom, white 80%, #eff6ff 100%);
+}
