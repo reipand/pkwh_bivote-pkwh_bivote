@@ -3,10 +3,9 @@ session_start();
 require_once '../config/koneksi.php';
 
 if (!isset($_SESSION['is_admin_logged_in']) || $_SESSION['is_admin_logged_in'] !== true) {
-    header("Location: admin_login.php");
+    header("Location: ../page/admin_login.php");
     exit;
 }
-
 $message = '';
 $is_error = false;
 

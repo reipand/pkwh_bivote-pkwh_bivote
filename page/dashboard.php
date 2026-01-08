@@ -32,7 +32,7 @@ $stmt_check_vote->close();
 
 
 // Ambil data kandidat dari database untuk ditampilkan di dashboard
-$sql = "SELECT id, nama_lengkap, foto_path, visi, misi, kejar, usia FROM kandidat ORDER BY id ASC";
+$sql = "SELECT id, nama_lengkap, foto_path, visi, misi, program_kerja, kejar, usia FROM kandidat ORDER BY id ASC";
 $result = $koneksi->query($sql);
 
 $candidates = [];

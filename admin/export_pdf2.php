@@ -9,10 +9,9 @@ use setasign\Fpdi\Fpdi;
 require_once '../config/koneksi.php';
 
 if (!isset($_SESSION['is_admin_logged_in']) || $_SESSION['is_admin_logged_in'] !== true) {
-    header("Location: admin_login.php");
+    header("Location: ../page/admin_login.php");
     exit;
 }
-
 // ===================================================================
 //  LANGKAH A: PENGAMBILAN DATA
 // ===================================================================
@@ -38,7 +37,7 @@ $result_total_voters = $koneksi->query($sql_total_voters);
 $total_voters = $result_total_voters->fetch_assoc()['total'];
 
 // Ambil daftar pemilih siswa (sudah dan belum memilih)
-$sql_voted = "SELECT nama_lengkap, nis FROM pemilih WHERE status_memilih = 1 AND role = 'siswa' ORDER BY nama_lengkap ASC";
+$sql_voted = "SELECT nama_lengkap, nis FROM pemilih WHERE status_memilih = 1  ORDER BY nama_lengkap ASC";
 $result_voted = $koneksi->query($sql_voted);
 $voted_list = [];
 if ($result_voted->num_rows > 0) {
@@ -47,7 +46,7 @@ if ($result_voted->num_rows > 0) {
     }
 }
 
-$sql_not_voted = "SELECT nama_lengkap, nis FROM pemilih WHERE status_memilih = 0 AND role = 'siswa' ORDER BY nama_lengkap ASC";
+$sql_not_voted = "SELECT nama_lengkap, nis FROM pemilih WHERE status_memilih = 0 ORDER BY nama_lengkap ASC";
 $result_not_voted = $koneksi->query($sql_not_voted);
 $not_voted_list = [];
 if ($result_not_voted->num_rows > 0) {

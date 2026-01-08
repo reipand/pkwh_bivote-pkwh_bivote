@@ -18,6 +18,7 @@
 --   `nis` VARCHAR(50) NOT NULL UNIQUE,
 --   `visi` TEXT NOT NULL,
 --   `misi` TEXT NOT NULL,
+--   `program_kerja` TEXT DEFAULT NULL,
 --   `video_path` VARCHAR(255) DEFAULT NULL, 
 --   `foto_path` VARCHAR(255) NOT NULL,
 --   `kejar` VARCHAR(255) NOT NULL,
@@ -46,7 +47,10 @@
 --   password VARCHAR(255) NOT NULL,
 --   PRIMARY KEY (id),
 --   UNIQUE KEY username (username)
--- ) 
+-- )
+
+-- -- ALTER TABLE untuk menambahkan kolom program_kerja
+-- ALTER TABLE `kandidat` ADD COLUMN `program_kerja` TEXT DEFAULT NULL AFTER `misi`; 
 
 -- -- === CONTOH DATA AWAL ===
 
@@ -174,6 +178,7 @@ CREATE TABLE `kandidat` (
   `nis` varchar(50) NOT NULL,
   `visi` text NOT NULL,
   `misi` text NOT NULL,
+  `program_kerja` text DEFAULT NULL,
   `video_path` varchar(255) DEFAULT NULL,
   `foto_path` varchar(255) NOT NULL,
   `kejar` varchar(255) NOT NULL,

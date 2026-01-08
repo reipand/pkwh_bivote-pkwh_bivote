@@ -2,10 +2,9 @@
 session_start();
 require_once '../config/koneksi.php';
 if (!isset($_SESSION['is_admin_logged_in']) || $_SESSION['is_admin_logged_in'] !== true) {
-    header("Location: admin_login.php");
+    header("Location: ../page/admin_login.php");
     exit;
 }
-
 // Ambil hasil voting
 $sql_results = "SELECT nama_lengkap, jumlah_suara, foto_path FROM kandidat ORDER BY jumlah_suara DESC";
 $result_results = $koneksi->query($sql_results);

@@ -4,10 +4,9 @@ require_once '../config/koneksi.php';
 
 // Pastikan hanya admin yang sudah login bisa akses
 if (!isset($_SESSION['is_admin_logged_in']) || $_SESSION['is_admin_logged_in'] !== true) {
-    header("Location: admin_login.php");
+    header("Location: ../page/admin_login.php");
     exit;
 }
-
 $message = '';
 $is_error = false;
 
@@ -39,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nis = htmlspecialchars(trim($_POST['nis']));
     $visi = htmlspecialchars(trim($_POST['visi']));
     $misi = htmlspecialchars(trim($_POST['misi']));
+    $program_kerja = htmlspecialchars(trim($_POST['program_kerja']));
     $kejar = htmlspecialchars(trim($_POST['kejar']));
     $usia = (int)$_POST['usia'];
     
@@ -49,55 +49,81 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
         $upload_dir = '../assets/image/';
         if (!is_dir($upload_dir)) {
-            mkdir($upload_dir, 0777, true);
+            mkdir($upload_dir, 0755, true);
         }
-        $foto_extension = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
-        $new_foto_name = 'kandidat_' . $id . '_' . time() . '.' . $foto_extension;
-        $foto_upload_path = $upload_dir . $new_foto_name;
         
-        if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_upload_path)) {
-            // Hapus foto lama jika ada
-            if ($kandidat['foto_path'] && file_exists($kandidat['foto_path'])) {
-                unlink($kandidat['foto_path']);
-            }
-            $foto_path = $foto_upload_path;
-        } else {
-            $message = 'Gagal mengunggah foto.';
+        // Validasi tipe file foto
+        $allowed_image_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $_FILES['foto']['tmp_name']);
+        finfo_close($finfo);
+        
+        if (!in_array($mime_type, $allowed_image_types)) {
+            $message = 'Format foto tidak didukung. Gunakan JPG, PNG, atau GIF.';
             $is_error = true;
+        } else {
+            $foto_extension = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+            $new_foto_name = 'kandidat_' . $id . '_' . time() . '.' . $foto_extension;
+            $foto_upload_path = $upload_dir . $new_foto_name;
+            
+            if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_upload_path)) {
+                // Hapus foto lama jika ada
+                if ($kandidat['foto_path'] && file_exists('../' . $kandidat['foto_path'])) {
+                    unlink('../' . $kandidat['foto_path']);
+                }
+                $foto_path = 'assets/image/' . $new_foto_name;
+            } else {
+                $message = 'Gagal mengunggah foto.';
+                $is_error = true;
+            }
         }
     }
     
     // Proses unggah video baru jika ada
     if (!$is_error && isset($_FILES['video']) && $_FILES['video']['error'] === UPLOAD_ERR_OK) {
-        // Logika kompresi video menggunakan FFMPEG
-        // ... (Kode ini harus memanggil atau mengimplementasikan logika kompresi seperti di `upload_video.php`)
-        // Untuk contoh ini, kita asumsikan video sudah berhasil diunggah dan dikompresi
+        // Validasi tipe file video
+        $allowed_video_types = ['video/mp4', 'video/webm', 'video/quicktime', 'video/mov', 'video/avi', 'video/x-msvideo'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $_FILES['video']['tmp_name']);
+        finfo_close($finfo);
         
-        $upload_dir_video = '../assets/videos/';
-        if (!is_dir($upload_dir_video)) {
-            mkdir($upload_dir_video, 0777, true);
-        }
-        $video_extension = pathinfo($_FILES['video']['name'], PATHINFO_EXTENSION);
-        $new_video_name = 'video_' . $id . '_' . time() . '.' . $video_extension;
-        $video_upload_path = $upload_dir_video . $new_video_name;
-
-        // Contoh sederhana tanpa kompresi FFMPEG (HANYA UNTUK DEMO)
-        if (move_uploaded_file($_FILES['video']['tmp_name'], $video_upload_path)) {
-            // Hapus video lama jika ada
-            if ($kandidat['video_path'] && file_exists($kandidat['video_path'])) {
-                unlink($kandidat['video_path']);
-            }
-            $video_path = $video_upload_path;
-        } else {
-            $message = 'Gagal mengunggah video.';
+        if (!in_array($mime_type, $allowed_video_types)) {
+            $message = 'Format video tidak didukung. Gunakan MP4, WebM, MOV, atau AVI. (MIME type terdeteksi: ' . $mime_type . ')';
             $is_error = true;
+        } else {
+            // Validasi ukuran video (max 50MB)
+            if ($_FILES['video']['size'] > 50 * 1024 * 1024) {
+                $message = 'Ukuran video terlalu besar. Maksimal 50MB.';
+                $is_error = true;
+            } else {
+                // Upload video langsung
+                $upload_dir = '../assets/videos/';
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0755, true);
+                }
+                
+                $video_extension = pathinfo($_FILES['video']['name'], PATHINFO_EXTENSION);
+                $new_video_name = 'video_' . $id . '_' . time() . '.' . $video_extension;
+                $video_upload_path = $upload_dir . $new_video_name;
+                
+                if (move_uploaded_file($_FILES['video']['tmp_name'], $video_upload_path)) {
+                    // Hapus video lama jika ada
+                    if ($kandidat['video_path'] && file_exists('../' . $kandidat['video_path'])) {
+                        unlink('../' . $kandidat['video_path']);
+                    }
+                    $video_path = 'assets/videos/' . $new_video_name;
+                } else {
+                    $message = 'Gagal mengunggah video.';
+                    $is_error = true;
+                }
+            }
         }
     }
     
     if (!$is_error) {
         // Perbarui data di database
-        $stmt = $koneksi->prepare("UPDATE kandidat SET nama_lengkap = ?, nis = ?, visi = ?, misi = ?, kejar = ?, usia = ?, foto_path = ?, video_path = ? WHERE id = ?");
-        $stmt->bind_param("sssssissi", $nama_lengkap, $nis, $visi, $misi, $kejar, $usia, $foto_path, $video_path, $id);
+        $stmt = $koneksi->prepare("UPDATE kandidat SET nama_lengkap = ?, nis = ?, visi = ?, misi = ?, program_kerja = ?, kejar = ?, usia = ?, foto_path = ?, video_path = ? WHERE id = ?");
+        $stmt->bind_param("ssssssissi", $nama_lengkap, $nis, $visi, $misi, $program_kerja, $kejar, $usia, $foto_path, $video_path, $id);
         
         if ($stmt->execute()) {
             $message = "Data kandidat berhasil diperbarui.";
@@ -143,7 +169,7 @@ $koneksi->close();
             <?php endif; ?>
 
             <div class="bg-white p-6 rounded-3xl shadow-lg">
-                <form action="edit_candidate.php?id=<?php echo $kandidat['id']; ?>" method="POST" enctype="multipart/form-data">
+                <form action="edit_candidate.php?id=<?php echo $kandidat['id']; ?>" method="POST" enctype="multipart/form-data" id="editForm">
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                         <div>
@@ -163,7 +189,7 @@ $koneksi->close();
                         </div>
                         <div>
                             <label for="usia" class="block text-gray-700 font-medium mb-2">Usia</label>
-                            <input type="number" id="usia" name="usia" value="<?php echo htmlspecialchars($kandidat['usia']); ?>" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <input type="number" id="usia" name="usia" value="<?php echo htmlspecialchars($kandidat['usia']); ?>" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required min="15" max="25">
                         </div>
                     </div>
 
@@ -176,37 +202,75 @@ $koneksi->close();
                         <label for="misi" class="block text-gray-700 font-medium mb-2">Misi (Pisahkan dengan titik koma ';')</label>
                         <textarea id="misi" name="misi" rows="5" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required><?php echo htmlspecialchars($kandidat['misi']); ?></textarea>
                     </div>
+
+                    <div class="mb-4">
+                        <label for="program_kerja" class="block text-gray-700 font-medium mb-2">Program Kerja (Pisahkan dengan titik koma ';')</label>
+                        <textarea id="program_kerja" name="program_kerja" rows="7" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required><?php echo htmlspecialchars($kandidat['program_kerja'] ?? ''); ?></textarea>
+                    </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label for="foto" class="block text-gray-700 font-medium mb-2">Foto Kandidat</label>
                             <?php if ($kandidat['foto_path']): ?>
                                 <div class="mb-2">
-                                    <img src="<?php echo htmlspecialchars($kandidat['foto_path']); ?>" alt="Foto Sekarang" class="w-24 h-24 object-cover rounded-full">
+                                    <img src="../<?php echo htmlspecialchars($kandidat['foto_path']); ?>" alt="Foto Sekarang" class="w-24 h-24 object-cover rounded-full">
+                                    <p class="text-xs text-gray-500 mt-1">Foto saat ini</p>
                                 </div>
                             <?php endif; ?>
                             <input type="file" id="foto" name="foto" accept="image/*" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <p class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin mengubah foto.</p>
+                            <p class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin mengubah foto. Maksimal 5MB.</p>
                         </div>
                         <div>
-                            <label for="video" class="block text-gray-700 font-medium mb-2">Video Visi Misi</label>
+                            <label for="video" class="block text-gray-700 font-medium mb-2">Video Visi Misi & Program Kerja</label>
                             <?php if ($kandidat['video_path']): ?>
                                 <div class="mb-2">
-                                    <video src="<?php echo htmlspecialchars($kandidat['video_path']); ?>" controls class="w-full rounded-lg"></video>
+                                    <video src="../<?php echo htmlspecialchars($kandidat['video_path']); ?>" controls class="w-full rounded-lg max-h-48"></video>
+                                    <p class="text-xs text-gray-500 mt-1">Video saat ini</p>
                                 </div>
                             <?php endif; ?>
                             <input type="file" id="video" name="video" accept="video/*" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <p class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin mengubah video.</p>
+                            <p class="text-xs text-gray-500 mt-1">Kosongkan jika tidak ingin mengubah video. Maksimal 50MB.</p>
                         </div>
                     </div>
 
                     <div class="flex justify-end space-x-4">
                         <a href="manage_candidates.php" class="py-2 px-6 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-colors">Batal</a>
-                        <button type="submit" class="py-2 px-6 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors">Perbarui Data</button>
+                        <button type="submit" class="py-2 px-6 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors" id="submitBtn">Perbarui Data</button>
                     </div>
                 </form>
             </div>
         </main>
     </div>
+
+    <script>
+        // Validasi form sebelum submit
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            const foto = document.getElementById('foto');
+            const video = document.getElementById('video');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Validasi ukuran file foto
+            if (foto.files[0]) {
+                if (foto.files[0].size > 5 * 1024 * 1024) {
+                    alert('Ukuran foto terlalu besar. Maksimal 5MB.');
+                    e.preventDefault();
+                    return;
+                }
+            }
+            
+            // Validasi ukuran file video
+            if (video.files[0]) {
+                if (video.files[0].size > 50 * 1024 * 1024) {
+                    alert('Ukuran video terlalu besar. Maksimal 50MB.');
+                    e.preventDefault();
+                    return;
+                }
+            }
+            
+            // Tampilkan loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Memproses...';
+        });
+    </script>
 </body>
 </html>

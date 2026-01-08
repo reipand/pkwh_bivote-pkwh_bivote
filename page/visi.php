@@ -31,7 +31,7 @@ $candidateId = isset($_GET['id']) ? (int)$_GET['id'] : null;
 $selectedCandidate = null;
 
 if ($candidateId) {
-    $stmt = $koneksi->prepare("SELECT id, nama_lengkap, foto_path, visi, misi, kejar, usia, video_path FROM kandidat WHERE id = ?");
+    $stmt = $koneksi->prepare("SELECT id, nama_lengkap, foto_path, visi, misi, program_kerja, kejar, usia, video_path FROM kandidat WHERE id = ?");
     $stmt->bind_param("i", $candidateId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -40,6 +40,7 @@ if ($candidateId) {
 
     if ($selectedCandidate) {
         $selectedCandidate['misi'] = explode(';', $selectedCandidate['misi']);
+        $selectedCandidate['program_kerja'] = explode(';', $selectedCandidate['program_kerja']);
     }
 }
 
@@ -103,19 +104,22 @@ $koneksi->close();
         
         <div class="mt-8 mb-8 p-4 bg-white rounded-2xl shadow-lg w-full h-auto" style="min-height: 400px;">
             <?php if (!empty($selectedCandidate['video_path'])): ?>
-                <div class="relative w-full h-0" style="padding-bottom: 56.25%;">
-                    <iframe
-                        class="absolute inset-0 w-full h-full rounded-2xl"
-                        src="<?php echo htmlspecialchars($selectedCandidate['video_path']); ?>"
-                        title="Video Visi Misi Kandidat"
-                        frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen
-                    ></iframe>
+                <div class="flex justify-center items-center w-full">
+                    <video
+                        class="rounded-2xl max-w-full max-h-96 object-contain shadow-md"
+                        src="../<?php echo htmlspecialchars($selectedCandidate['video_path']); ?>"
+                        title="Video Visi Misi & Program Kerja Kandidat"
+                        controls
+                        preload="metadata"
+                        style="max-width: 100%; height: auto;"
+                    >
+                        Browser Anda tidak mendukung pemutaran video.
+                        <a href="../<?php echo htmlspecialchars($selectedCandidate['video_path']); ?>" download>Download video</a>
+                    </video>
                 </div>
             <?php else: ?>
                 <div class="flex items-center justify-center h-full text-gray-400 text-lg">
-                    <p>Video visi misi belum tersedia.</p>
+                    <p>Video visi misi & program kerja belum tersedia.</p>
                 </div>
             <?php endif; ?>
         </div>
@@ -132,6 +136,18 @@ $koneksi->close();
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                         </svg>
                         <span class="flex-1"><?php echo htmlspecialchars($misiItem); ?></span>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 mt-8">PROGRAM KERJA</h2>
+            <ul class="text-gray-700 leading-relaxed list-inside">
+                <?php foreach ($selectedCandidate['program_kerja'] as $programItem): ?>
+                    <li class="mb-2 flex items-start">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2 mt-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="flex-1"><?php echo htmlspecialchars($programItem); ?></span>
                     </li>
                 <?php endforeach; ?>
             </ul>

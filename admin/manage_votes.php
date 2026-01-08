@@ -4,10 +4,9 @@ require_once '../config/koneksi.php';
 
 // Pastikan hanya admin yang sudah login bisa akses
 if (!isset($_SESSION['is_admin_logged_in']) || $_SESSION['is_admin_logged_in'] !== true) {
-    header("Location: admin_login.php");
+    header("Location: ../page/admin_login.php");
     exit;
 }
-
 // Logika untuk menangani penghapusan pemilih
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $id_to_delete = (int)$_GET['id'];

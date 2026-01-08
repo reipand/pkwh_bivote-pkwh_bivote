@@ -3,10 +3,9 @@ session_start();
 require_once '../config/koneksi.php';
 
 if (!isset($_SESSION['is_admin_logged_in']) || $_SESSION['is_admin_logged_in'] !== true) {
-    header("Location: admin_login.php");
+    header("Location: ../page/admin_login.php");
     exit;
 }
-
 $kandidat_with_proker = [
     [
         'id' => 1,
@@ -263,7 +262,7 @@ $kandidat_with_proker = [
                 <!-- /versi teks -->
                 <div class="col-span-1 lg:col-span-2 bg-white p-6 rounded-3xl shadow-lg">
     <h3 class="text-2xl font-bold text-gray-800 mb-1">Program Kerja Kandidat</h3>
-    <p class="text-gray-500 mb-6">Lihat visi dan misi dari setiap calon Ketua OSIS 2025–2026.</p>
+    <p class="text-gray-500 mb-6">Lihat visi, misi, dan program kerja dari setiap calon Ketua OSIS 2025–2026.</p>
     
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($kandidat_with_proker as $index => $kandidat): ?>

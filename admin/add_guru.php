@@ -3,10 +3,9 @@ session_start();
 require_once '../config/koneksi.php';
 
 if (!isset($_SESSION['is_admin_logged_in']) || $_SESSION['is_admin_logged_in'] !== true) {
-    header("Location: admin_login.php");
+    header("Location: ../page/admin_login.php");
     exit;
 }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama_lengkap = $_POST['nama_lengkap'];
     $nik = $_POST['nik'];
@@ -34,8 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt_check->close();
 
     // Tambahkan guru baru
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     $stmt = $koneksi->prepare("INSERT INTO guru (nama_lengkap, nik, password, jabatan, status_memilih) VALUES (?, ?, ?, ?, 0)");
-    $stmt->bind_param("ssss", $nama_lengkap, $nik, $password, $jabatan);
+    $stmt->bind_param("ssss", $nama_lengkap, $nik, $hashed_password, $jabatan);
     
     if ($stmt->execute()) {
         $_SESSION['success_message'] = 'Guru berhasil ditambahkan.';

@@ -10,13 +10,14 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
 
 $kandidat = [];
 // PERBAIKAN: Mengambil kolom-kolom yang sesuai dengan skema database
-$sql = "SELECT id, nama_lengkap, nis, visi, misi, video_path, foto_path, kejar, usia FROM kandidat ORDER BY id ASC";
+$sql = "SELECT id, nama_lengkap, nis, visi, misi, program_kerja, video_path, foto_path, kejar, usia FROM kandidat ORDER BY id ASC";
 $result = $koneksi->query($sql);
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
         // PERBAIKAN: Mengkonversi string misi menjadi array
         $row['misi'] = explode(';', $row['misi']);
+        $row['program_kerja'] = explode(';', $row['program_kerja']);
         $kandidat[] = $row;
     }
     echo json_encode(['status' => 'success', 'data' => $kandidat]);

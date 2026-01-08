@@ -3,7 +3,7 @@ session_start();
 require_once '../config/koneksi.php';
 
 // Data yang akan digunakan di halaman
-$sql_results = "SELECT nama_lengkap, jumlah_suara, foto_path, visi, misi FROM kandidat ORDER BY jumlah_suara DESC";
+$sql_results = "SELECT nama_lengkap, jumlah_suara, foto_path, visi, misi, program_kerja FROM kandidat ORDER BY jumlah_suara DESC";
 $result_results = $koneksi->query($sql_results);
 
 $all_results = [];

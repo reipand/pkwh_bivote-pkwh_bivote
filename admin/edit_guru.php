@@ -10,7 +10,6 @@ if (!isset($_SESSION['is_admin_logged_in']) || $_SESSION['is_admin_logged_in'] !
     exit;
 }
 
-
 $message = '';
 $is_error = false;
 $voter = null;
